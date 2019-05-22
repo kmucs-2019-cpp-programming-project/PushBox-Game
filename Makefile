@@ -1,23 +1,47 @@
 CXX := g++
 CXXFLAGS := -g
+LDFLAGS := $(CXXFLAGS) -MMD -MP -c
 LIBS := -lncursesw
 
-TARGET := a.out
-SOURCES := $(wildcard *.cpp)
-OBJECTS := $(patsubst %.cpp,%.o,$(SOURCES))
-DEPENDS := $(patsubst %.cpp,%.d,$(SOURCES))
+Q := @
+ECHO := $(Q) echo
 
--include $(DEPENDS)
+OUT := build
+SRC := src
 
-.PHONY: all clean
+TARGET := $(OUT)/a.out
+SOURCES := $(wildcard $(SRC)/*.cpp)
+OBJECTS := $(subst $(SRC),$(OUT),$(patsubst %.cpp,%.o,$(SOURCES)))
+DEPENDS := $(patsubst %.o,%.d,$(OBJECTS))
 
-all: $(TARGET)
+.PHONY: all clean vars
+
+all: $(OUT) $(TARGET)
+
+vars:
+	$(ECHO) 'TARGET - $(TARGET), OBJECTS - $(OBJECTS), DEPENDS - $(DEPENDS), SOURCES - $(SOURCES)'
+
+$(OUT):
+	$(ECHO) "'$(OUT)' folder is not exists. creating folder."
+	$(Q) mkdir -p $(OUT)
 
 $(TARGET): $(OBJECTS)
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJECTS) $(LIBS)
+	$(ECHO) '[LD] $^ => $@'
+	$(Q) $(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJECTS) $(LIBS)
 
-%.o: %.cpp Makefile
-	$(CXX) $(CXXFLAGS) -MMD -MP -c -o $@ $< $(LIBS)
+$(OUT)/%.o: $(SRC)/%.cpp Makefile
+	$(ECHO) '[CXX] $< => $@'
+	$(Q) $(CXX) $(LDFLAGS) -o $@ $< $(LIBS)
 
 clean:
-	rm -f $(TARGET) $(OBJECTS) $(DEPENDS)
+	$(ECHO) '[DEL] $(TARGET)'
+	$(Q)rm -f $(TARGET) 
+	$(ECHO) '[DEL] $(OBJECTS)'
+	$(Q)rm -f $(OBJECTS)
+	$(ECHO) '[DEL] $(DEPENDS)'
+	$(Q)rm -f $(DEPENDS)
+
+run:
+	$(Q) $(TARGET)
+
+-include $(DEPENDS)

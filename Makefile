@@ -1,5 +1,5 @@
 CXX := g++
-CXXFLAGS := -g
+CXXFLAGS := -std=c++14 -g
 LDFLAGS := $(CXXFLAGS) -MMD -MP -c
 LIBS := -lncursesw
 

@@ -35,7 +35,7 @@ string getresource(int type)
 
 void gameinit()
 {
-	setlocale(LC_CTYPE,"ko_KR.utf8"); 
+	setlocale(LC_ALL,""); 
 
 	resize_term(GAMEY, GAMEX);
 	char cmd[100];

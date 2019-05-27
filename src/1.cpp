@@ -20,24 +20,38 @@ enum BLOCK{
 	BOX,
 	GOAL,
 	AIR,
+	PLAYER,
 	NONE
 };
 
+int playery, playerx;
+int dirx[4] = {0, 0, -1, 1};
+int diry[4] = {1, -1, 0, 0};
 vector<vector<char>> gamemap;
 vector<vector<char>> objectmap;
 
-string res[]={"","■", "▧", "☆", "", ""};
+string res[]={" ","■", "▧", "☆", " ", "●", ""};
 
 string getresource(int type)
 {
-	return res[type-'0'];
+	return res[type - FLOOR];
+}
+
+int getdiry(int dir)
+{
+	return diry[dir - KEY_DOWN];
+}
+
+int getdirx(int dir)
+{
+	return dirx[dir - KEY_DOWN];
 }
 
 void gameinit()
 {
 	setlocale(LC_ALL,""); 
 
-	resize_term(GAMEY, GAMEX);
+	resize_term(GAMEY, 2*GAMEX);
 	char cmd[100];
 	sprintf(cmd, "resize -s %d %d", GAMEY, 2*GAMEX);
 	system(cmd);
@@ -70,6 +84,8 @@ void loadstage(int stage_num)
 			gamemap.push_back(g);
 			objectmap.push_back(o);
 		}
+		playery = playerx = 2;
+		objectmap[playery][playerx] = PLAYER;
 		f.close();
 	}
 	else{
@@ -86,18 +102,54 @@ void refreshmap()
 	}
 	for(int i=0; i<objectmap.size(); i++){
 		for(int j=0; j<objectmap[i].size(); j++){
-			mvprintw(i,2*j,"%s",getresource(objectmap[i][j]).c_str());
+			mvprintw(i,2*j,"%s", getresource(objectmap[i][j]).c_str());
 		}
 	}
 	refresh();
+}
+
+bool moveobject(int y, int x, int dir, int step)
+{
+	if(step > 2) return false;
+	int movey = y + getdiry(dir), movex = x + getdirx(dir);
+	if(gamemap[movey][movex] == WALL)
+		return false;
+	if(objectmap[movey][movex] == BOX && !moveobject(movey, movex, dir, step + 1))
+		return false;
+	objectmap[movey][movex] = objectmap[y][x];
+	objectmap[y][x] = NONE;
+	return true;
+}
+
+void keyevent(){
+	int key;
+	while((key = getch()) != KEY_F(2)){
+		// movement
+		switch (key)
+		{
+		case KEY_DOWN:
+		case KEY_UP:
+		case KEY_LEFT:
+		case KEY_RIGHT:
+			if(moveobject(playery, playerx, key, 1)){
+				playery += getdiry(key);
+				playerx += getdirx(key);
+			}
+			break;
+		
+		default:
+			break;
+		}
+
+		refreshmap();
+	}
 }
 
 int main()
 {
 	gameinit();
 	loadstage(2);	// 1 ~ 5
-	refreshmap();
-	getch();
+	keyevent();
 	endwin();
 	return 0;
 }

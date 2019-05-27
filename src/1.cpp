@@ -39,6 +39,7 @@ string res[]={" ","■", "▧", "☆", " ", "●", ""};	// 블럭 리소스
 // 블럭 타입을 리소스로 변환
 string getresource(int type)
 {
+	// type을 인덱스로 변환해서 반환
 	return res[type - FLOOR];
 }
 
@@ -57,23 +58,23 @@ int getdirx(int dir)
 // 게임(ncurses) 초기설정
 void gameinit()
 {
+	// 한글 출력을 위한 locale설정
 	setlocale(LC_ALL,""); 
 
+	// 맵 크기에 맞게 터미널 크기 변경
 	resize_term(GAMEY, 2*GAMEX);
 	char cmd[100];
 	sprintf(cmd, "resize -s %d %d", GAMEY, 2*GAMEX);
 	system(cmd);
 
+	// curses 모드 시작
 	initscr();
-
-	keypad(stdscr, true);
-	curs_set(0);
-	noecho();
 }
 
 // 스테이지 로드(파일 입출력)
 void loadstage(int stage_num)
 {
+	// 스테이지 데이터 파일 열기
 	ifstream f("stage/" + to_string(stage_num));
 	string s;
 	if (f.is_open()){
@@ -105,16 +106,19 @@ void loadstage(int stage_num)
 // 화면 업데이트
 void refreshmap()
 {
+	// 맵 데이터 출력
 	for(int i=0; i<gamemap.size(); i++){
 		for(int j=0; j<gamemap[i].size(); j++){
 			mvprintw(i,2*j,"%s",getresource(gamemap[i][j]).c_str());
 		}
 	}
+	// 그 위에 오브젝트 데이터 출력
 	for(int i=0; i<objectmap.size(); i++){
 		for(int j=0; j<objectmap[i].size(); j++){
 			mvprintw(i,2*j,"%s", getresource(objectmap[i][j]).c_str());
 		}
 	}
+	// 터미널 화면 업데이트
 	refresh();
 }
 
@@ -166,7 +170,9 @@ void keyevent(){
 // 메인함수
 int main()
 {
+	// 게임 초기설정
 	gameinit();
+	// 스테이지 로드
 	loadstage(2);	// 1 ~ 5
 	keyevent();
 	endwin();

@@ -14,6 +14,7 @@ using namespace std;
 ☆ ★ ○ ● ◎ ◇ ◆ □ ■ △ ▲ ▽ ▼ → ← ↑ ↓ ↔ 〓 ◁ ◀ ▷ ▶ ♤ ♠ ♡ ♥ ♧ ♣ ⊙ ◈ ▣ ◐ ◑ ▒ ▤ ▥ ▨ ▧ ▦ ▩ 
 */
 
+// 블럭 타입 열거체
 enum BLOCK{
 	FLOOR='0',
 	WALL,
@@ -24,18 +25,18 @@ enum BLOCK{
 	NONE
 };
 
-
 int step; // 캐릭터가 움직인 횟수
 int push; // 상자가 움직인 횟수
 int playery; // 플레이어의 y 좌표
 int playerx; // 플레이어의 x 좌표
 int diry[4] = {1, -1, 0, 0}; // 방향에 따른 y 좌표 전환 배열
 int dirx[4] = {0, 0, -1, 1}; // 뱡향에 따른 x 좌표 전환 배열
-vector<vector<char>> gamemap;
-vector<vector<char>> objectmap;
+vector<vector<char>> gamemap;	// 맵 데이터(벽, 목표지점, 바닥, 맵밖)
+vector<vector<char>> objectmap;	// 오브젝트 데이터(상자, 플레이어)
 
-string res[]={" ","■", "▧", "☆", " ", "●", ""};
+string res[]={" ","■", "▧", "☆", " ", "●", ""};	// 블럭 리소스
 
+// 블럭 타입을 리소스로 변환
 string getresource(int type)
 {
 	return res[type - FLOOR];
@@ -51,6 +52,7 @@ int getdirx(int dir)
 	return dirx[dir - KEY_DOWN];
 }
 
+// 게임(ncurses) 초기설정
 void gameinit()
 {
 	setlocale(LC_ALL,""); 
@@ -67,6 +69,7 @@ void gameinit()
 	noecho();
 }
 
+// 스테이지 로드(파일 입출력)
 void loadstage(int stage_num)
 {
 	ifstream f("stage/" + to_string(stage_num));
@@ -97,6 +100,7 @@ void loadstage(int stage_num)
 	}
 }
 
+// 화면 업데이트
 void refreshmap()
 {
 	for(int i=0; i<gamemap.size(); i++){
@@ -154,6 +158,7 @@ void keyevent(){
 	}
 }
 
+// 메인함수
 int main()
 {
 	gameinit();

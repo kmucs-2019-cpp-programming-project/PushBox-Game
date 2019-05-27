@@ -30,7 +30,7 @@ int diry[4] = {1, -1, 0, 0};
 vector<vector<char>> gamemap;
 vector<vector<char>> objectmap;
 
-string res[]={" ","■", "▧", "☆", " ", "●", ""};
+string res[]={"  ","■", "▧", "☆", "  ", "●", ""};
 
 string getresource(int type)
 {

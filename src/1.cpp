@@ -29,8 +29,8 @@ int step; // 캐릭터가 움직인 횟수
 int push; // 상자가 움직인 횟수
 int playery; // 플레이어의 y 좌표
 int playerx; // 플레이어의 x 좌표
-int diry[4] = {1, -1, 0, 0}; // 방향에 따른 y 좌표 전환 배열
-int dirx[4] = {0, 0, -1, 1}; // 뱡향에 따른 x 좌표 전환 배열
+int diry[4] = {1, -1, 0, 0}; // 방향에 따른 y 좌표 변환 배열
+int dirx[4] = {0, 0, -1, 1}; // 뱡향에 따른 x 좌표 변환 배열
 vector<vector<char>> gamemap;	// 맵 데이터(벽, 목표지점, 바닥, 맵밖)
 vector<vector<char>> objectmap;	// 오브젝트 데이터(상자, 플레이어)
 
@@ -42,11 +42,13 @@ string getresource(int type)
 	return res[type - FLOOR];
 }
 
+// nCurses의 키를 입력받으면 변환해야할 y 좌표 값을 반환
 int getdiry(int dir)
 {
 	return diry[dir - KEY_DOWN];
 }
 
+// nCurses의 키를 입력받으면 변환해야할 x 좌표 값을 반환
 int getdirx(int dir)
 {
 	return dirx[dir - KEY_DOWN];
@@ -116,6 +118,7 @@ void refreshmap()
 	refresh();
 }
 
+// nCurses의 키를 입력받으면, 오브젝트의 움직임을 처리
 bool moveobject(int y, int x, int dir, int count)
 {
 	if(count > 2) return false;
@@ -133,6 +136,8 @@ bool moveobject(int y, int x, int dir, int count)
 	step++;
 	return true;
 }
+
+bool clearcheck(){}
 
 void keyevent(){
 	int key;

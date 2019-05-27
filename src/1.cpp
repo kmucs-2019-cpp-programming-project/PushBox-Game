@@ -159,7 +159,7 @@ bool clearcheck()
 
 void keyevent(){
 	int key;
-	while((key = getch()) != KEY_F(2)){
+	do{
 		// movement
 		switch (key)
 		{
@@ -178,10 +178,11 @@ void keyevent(){
 		}
 
 		refreshmap();
+		// 스테이지가 클리어 되었는지 확인한다.
 		if(clearcheck()){
 			break;
 		}
-	}
+	}while((key = getch()) != KEY_F(2));
 }
 
 // 메인함수

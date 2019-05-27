@@ -69,6 +69,12 @@ void gameinit()
 
 	// curses 모드 시작
 	initscr();
+
+	// 키보드 입력
+	keypad(stdscr, TRUE);
+	// 커서설정
+	curs_set(0);
+	noecho();
 }
 
 // 스테이지 로드(파일 입출력)

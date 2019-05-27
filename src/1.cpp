@@ -141,7 +141,15 @@ bool moveobject(int y, int x, int dir, int count)
 	return true;
 }
 
-bool clearcheck(){}
+// 스테이지가 클리어 되었는지 확인
+bool clearcheck()
+{
+	for(int y = 0; y < gamemap.size(); y++)
+		for(int x = 0; x < gamemap[y].size(); x++)
+			if(gamemap[y][x] == GOAL && objectmap[y][x] != BOX)
+				return false;
+	return true;
+}
 
 void keyevent(){
 	int key;
@@ -157,6 +165,7 @@ void keyevent(){
 				playery += getdiry(key);
 				playerx += getdirx(key);
 			}
+			clearcheck();
 			break;
 		
 		default:

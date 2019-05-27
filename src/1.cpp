@@ -171,7 +171,6 @@ void keyevent(){
 				playery += getdiry(key);
 				playerx += getdirx(key);
 			}
-			clearcheck();
 			break;
 		
 		default:
@@ -179,6 +178,9 @@ void keyevent(){
 		}
 
 		refreshmap();
+		if(clearcheck()){
+			break;
+		}
 	}
 }
 

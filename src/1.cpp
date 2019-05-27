@@ -25,9 +25,12 @@ enum BLOCK{
 	NONE
 };
 
-int playery, playerx;
-int dirx[4] = {0, 0, -1, 1};
-int diry[4] = {1, -1, 0, 0};
+int step; // 캐릭터가 움직인 횟수
+int push; // 상자가 움직인 횟수
+int playery; // 플레이어의 y 좌표
+int playerx; // 플레이어의 x 좌표
+int diry[4] = {1, -1, 0, 0}; // 방향에 따른 y 좌표 전환 배열
+int dirx[4] = {0, 0, -1, 1}; // 뱡향에 따른 x 좌표 전환 배열
 vector<vector<char>> gamemap;	// 맵 데이터(벽, 목표지점, 바닥, 맵밖)
 vector<vector<char>> objectmap;	// 오브젝트 데이터(상자, 플레이어)
 
@@ -123,10 +126,15 @@ bool moveobject(int y, int x, int dir, int count)
 	int movey = y + getdiry(dir), movex = x + getdirx(dir);
 	if(gamemap[movey][movex] == WALL)
 		return false;
-	if(objectmap[movey][movex] == BOX && !moveobject(movey, movex, dir, count + 1))
-		return false;
+	if(objectmap[movey][movex] == BOX){
+		if(!moveobject(movey, movex, dir, count + 1))
+			return false;
+		push++;
+		step--;
+	}
 	objectmap[movey][movex] = objectmap[y][x];
 	objectmap[y][x] = NONE;
+	step++;
 	return true;
 }
 

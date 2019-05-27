@@ -30,7 +30,7 @@ int diry[4] = {1, -1, 0, 0};
 vector<vector<char>> gamemap;
 vector<vector<char>> objectmap;
 
-string res[]={"  ","■", "▧", "☆", "  ", "●", ""};
+string res[]={" ","■", "▧", "☆", " ", "●", ""};
 
 string getresource(int type)
 {
@@ -108,13 +108,13 @@ void refreshmap()
 	refresh();
 }
 
-bool moveobject(int y, int x, int dir, int step)
+bool moveobject(int y, int x, int dir, int count)
 {
-	if(step > 2) return false;
+	if(count > 2) return false;
 	int movey = y + getdiry(dir), movex = x + getdirx(dir);
 	if(gamemap[movey][movex] == WALL)
 		return false;
-	if(objectmap[movey][movex] == BOX && !moveobject(movey, movex, dir, step + 1))
+	if(objectmap[movey][movex] == BOX && !moveobject(movey, movex, dir, count + 1))
 		return false;
 	objectmap[movey][movex] = objectmap[y][x];
 	objectmap[y][x] = NONE;

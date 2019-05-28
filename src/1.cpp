@@ -23,7 +23,7 @@ enum BLOCK { FLOOR = '0',
              PLAYER,
              NONE };
 
-int level;
+int level;                      // 현재 스테이지 레벨
 int step;                       // 캐릭터가 움직인 횟수
 int push;                       // 상자가 움직인 횟수
 int playery;                    // 플레이어의 y 좌표
@@ -35,8 +35,8 @@ vector<vector<char>> objectmap; // 오브젝트 데이터(상자, 플레이어)
 
 string res[] = {"  ", "██", "⍈⍇", "◂▸", "  ", "홋", ""}; // 블럭 리소스
 
-WINDOW *left_top;    // 오른쪽 점수판
-WINDOW *left_bottom; // 오른쪽 플레이 안내
+WINDOW *right_top;    // 오른쪽 점수판
+WINDOW *right_bottom; // 오른쪽 플레이 안내
 WINDOW *title;       // 상단 타이틀
 WINDOW *game;        // 게임 화면
 
@@ -80,14 +80,14 @@ void gameinit() {
     refresh();
 
     // 윈도우 선언
-    left_top = newwin(13, 30, 2, 50);
-    left_bottom = newwin(11, 30, 14, 50);
+    right_top = newwin(13, 30, 2, 50);
+    right_bottom = newwin(11, 30, 14, 50);
     title = newwin(3, 0, 0, 0);
     game = newwin(21, 47, 3, 2);
 
     // 윈도우 내부 보더 표시
-    wborder(left_top, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_TTEE, ACS_RTEE, ACS_LTEE, ACS_RTEE);
-    wborder(left_bottom, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_LTEE, ACS_RTEE, ACS_BTEE, ACS_LRCORNER);
+    wborder(right_top, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_TTEE, ACS_RTEE, ACS_LTEE, ACS_RTEE);
+    wborder(right_bottom, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_LTEE, ACS_RTEE, ACS_BTEE, ACS_LRCORNER);
     wborder(title, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LTEE, ACS_RTEE);
     wborder(game, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
 
@@ -95,16 +95,16 @@ void gameinit() {
     mvwprintw(title, 1, 33, "S O K O B A N");
 
     // 설명 입력
-    mvwprintw(left_bottom, 2, 10, "↑");
-    mvwprintw(left_bottom, 3, 8, "← ● → : Move");
-    mvwprintw(left_bottom, 4, 10, "↓");
-    mvwprintw(left_bottom, 6, 10, "r   : Reset");
-    mvwprintw(left_bottom, 8, 10, "q   : Quit");
+    mvwprintw(right_bottom, 2, 10, "↑");
+    mvwprintw(right_bottom, 3, 8, "← ● → : Move");
+    mvwprintw(right_bottom, 4, 10, "↓");
+    mvwprintw(right_bottom, 6, 10, "r   : Reset");
+    mvwprintw(right_bottom, 8, 10, "q   : Quit");
 
     // 윈도우 갱신
     wrefresh(title);
-    wrefresh(left_top);
-    wrefresh(left_bottom);
+    wrefresh(right_top);
+    wrefresh(right_bottom);
     wrefresh(game);
 }
 
@@ -117,9 +117,9 @@ void loadstage(int stage_num) {
     objectmap.clear();
 
     wclear(game);
-    wclear(left_top);
+    wclear(right_top);
 
-    wborder(left_top, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_TTEE, ACS_RTEE, ACS_LTEE, ACS_RTEE);
+    wborder(right_top, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_TTEE, ACS_RTEE, ACS_LTEE, ACS_RTEE);
 
     step = push = 0;
     if (f.is_open()) {
@@ -167,10 +167,10 @@ void refreshmap() {
 
 // 우측 정보 업데이트
 void refreshstatus() {
-    mvwprintw(left_top, 3, 8, "Level :  %d", level);
-    mvwprintw(left_top, 6, 8, "Step  :  %d", step);
-    mvwprintw(left_top, 9, 8, "Push  :  %d", push);
-    wrefresh(left_top);
+    mvwprintw(right_top, 3, 8, "Level :  %d", level);
+    mvwprintw(right_top, 6, 8, "Step  :  %d", step);
+    mvwprintw(right_top, 9, 8, "Push  :  %d", push);
+    wrefresh(right_top);
 }
 
 // nCurses의 키를 입력받으면, 오브젝트의 움직임을 처리
@@ -178,16 +178,23 @@ bool moveobject(int y, int x, int dir, int count) {
     if (count > 2)
         return false;
     int movey = y + getdiry(dir), movex = x + getdirx(dir);
+    // 이동하려는 방향에 벽인지 확인
     if (gamemap[movey][movex] == WALL)
         return false;
+    // 이동하려는 방향이 상자인지 확인
     if (objectmap[movey][movex] == BOX) {
+        // 상자를 움직일 수 있는지 확인
         if (!moveobject(movey, movex, dir, count + 1))
             return false;
+        // 상자를 움직인 횟수 증가
         push++;
+        // 플레이어가 움직인 횟수 감소
         step--;
     }
+    // 현재 물체를 이동하려는 방향으로 옮김
     objectmap[movey][movex] = objectmap[y][x];
     objectmap[y][x] = NONE;
+    // 플레이어가 움직인 횟수 증가
     step++;
     return true;
 }

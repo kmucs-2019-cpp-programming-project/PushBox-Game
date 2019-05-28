@@ -71,29 +71,24 @@ void gameinit() {
 void loadstage(int stage_num) {
     // 스테이지 데이터 파일 열기
     ifstream f("stage/" + to_string(stage_num));
-    string s;
     if (f.is_open()) {
-        while (getline(f, s)) {
-            vector<char> g, o;
-            for (char ch : s) {
-                if (ch == ' ')
-                    continue;
-                if (ch == BOX) {
-                    g.push_back(FLOOR);
-                    o.push_back(ch);
-                } else {
-                    g.push_back(ch);
-                    o.push_back(NONE);
-                }
+        int r, c;
+        f >> r >> c;
+        gamemap.resize(r, vector<char>(c, FLOOR));
+        objectmap.resize(r, vector<char>(c, NONE));
+        for(int i = 0; i < r; i++){
+            for(int j = 0; j < c; j++){
+                char ch;
+                f >> ch;
+                if(ch == BOX) objectmap[i][j] = ch;
+                else gamemap[i][j] = ch;
             }
-            gamemap.push_back(g);
-            objectmap.push_back(o);
         }
-        playery = playerx = 2;
+        f >> playery >> playerx;
         objectmap[playery][playerx] = PLAYER;
         f.close();
     } else {
-        printw("Not Found File");
+        printw("파일 없음");
     }
 }
 

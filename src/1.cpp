@@ -250,6 +250,7 @@ int keyevent() {
             prev_playerx = playerx;
             prev_playery = playery;
             prev_step = step;
+            prev_push = push;
             if (moveobject(playery, playerx, key, 1)) {
                 playery += getdiry(key);
                 playerx += getdirx(key);

@@ -221,7 +221,9 @@ bool clearcheck() {
 
 // 실행취소
 void undo() {
+    // 이전에 실행취소했다면 return
     if(prev_push == -1) return;
+    // 이전 데이터로 롤백
     step = prev_step;
     push = prev_push;
     playerx = prev_playerx;

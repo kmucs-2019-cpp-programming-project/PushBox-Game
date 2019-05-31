@@ -25,13 +25,19 @@ enum BLOCK { FLOOR = '0',
 
 int level;                      // 현재 스테이지 레벨
 int step;                       // 캐릭터가 움직인 횟수
+int prev_step;                  // Undo
 int push;                       // 상자가 움직인 횟수
+int prev_push;                  // Undo
 int playery;                    // 플레이어의 y 좌표
+int prev_playery;               // Undo
 int playerx;                    // 플레이어의 x 좌표
+int prev_playerx;               // Undo
 int diry[4] = {1, -1, 0, 0};    // 방향에 따른 y 좌표 변환 배열
 int dirx[4] = {0, 0, -1, 1};    // 뱡향에 따른 x 좌표 변환 배열
 vector<vector<char>> gamemap;   // 맵 데이터(벽, 목표지점, 바닥, 맵밖)
+vector<vector<char>> prev_gamemap;  // Undo
 vector<vector<char>> objectmap; // 오브젝트 데이터(상자, 플레이어)
+vector<vector<char>> prev_objectmap;    // Undo
 
 string res[] = {"  ", "██", "⍈⍇", "◂▸", "  ", "홋", ""}; // 블럭 리소스
 
@@ -95,11 +101,12 @@ void gameinit() {
     mvwprintw(title, 1, 33, "S O K O B A N");
 
     // 설명 입력
-    mvwprintw(right_bottom, 2, 10, "↑");
-    mvwprintw(right_bottom, 3, 8, "← ● → : Move");
-    mvwprintw(right_bottom, 4, 10, "↓");
-    mvwprintw(right_bottom, 6, 10, "r   : Reset");
-    mvwprintw(right_bottom, 8, 10, "q   : Quit");
+    mvwprintw(right_bottom, 1, 10, "↑");
+    mvwprintw(right_bottom, 2, 8, "← ● → : Move");
+    mvwprintw(right_bottom, 3, 10, "↓");
+    mvwprintw(right_bottom, 5, 10, "r   : Reset");
+    mvwprintw(right_bottom, 7, 10, "q   : Quit");
+    mvwprintw(right_bottom, 9, 10, "z   : Undo");
 
     // 윈도우 갱신
     wrefresh(title);
@@ -121,7 +128,7 @@ void loadstage(int stage_num) {
 
     wborder(right_top, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_TTEE, ACS_RTEE, ACS_LTEE, ACS_RTEE);
 
-    step = push = 0;
+    prev_push = prev_step = step = push = 0;
     if (f.is_open()) {
         int r, c;
         f >> r >> c;
@@ -137,6 +144,10 @@ void loadstage(int stage_num) {
         }
         f >> playery >> playerx;
         objectmap[playery][playerx] = PLAYER;
+        prev_gamemap = gamemap;
+        prev_objectmap = objectmap;
+        prev_playerx = playerx;
+        prev_playery = playery;
         f.close();
     } else {
         printw("파일 없음");
@@ -208,6 +219,18 @@ bool clearcheck() {
     return true;
 }
 
+// 실행취소
+void undo() {
+    if(prev_push == -1) return;
+    step = prev_step;
+    push = prev_push;
+    playerx = prev_playerx;
+    playery = prev_playery;
+    gamemap = prev_gamemap;
+    objectmap = prev_objectmap;
+    prev_push = -1;
+}
+
 int keyevent() {
     int key;
     do {
@@ -217,6 +240,12 @@ int keyevent() {
         case KEY_UP:
         case KEY_LEFT:
         case KEY_RIGHT:
+            prev_gamemap = gamemap;
+            prev_objectmap = objectmap;
+            prev_playerx = playerx;
+            prev_playery = playery;
+            prev_step = step;
+            prev_push = push;
             if (moveobject(playery, playerx, key, 1)) {
                 playery += getdiry(key);
                 playerx += getdirx(key);
@@ -228,6 +257,10 @@ int keyevent() {
 
         case 'r':
             loadstage(level);
+            break;
+
+        case 'z':
+            undo();
             break;
 
         default:

@@ -179,8 +179,9 @@ void refreshmap() {
 // 우측 정보 업데이트
 void refreshstatus() {
     mvwprintw(right_top, 3, 8, "Level :  %d", level);
-    mvwprintw(right_top, 6, 8, "Step  :  %d", step);
-    mvwprintw(right_top, 9, 8, "Push  :  %d", push);
+    mvwprintw(right_top, 5, 8, "Step  :  %d", step);
+    mvwprintw(right_top, 7, 8, "Push  :  %d", push);
+    mvwprintw(right_top, 9, 8, "Undo  :  %s", (prev_push != -1) ? "Able" : "Disabled");
     wrefresh(right_top);
 }
 

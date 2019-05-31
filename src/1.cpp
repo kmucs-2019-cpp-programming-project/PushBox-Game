@@ -221,6 +221,8 @@ bool clearcheck() {
 
 // 실행취소
 void undo() {
+    // 움직인 적이 있을때만 사용이 가능
+    if(!step) return;
     // 이전에 실행취소했다면 return
     if(prev_push == -1) return;
     // 이전 데이터로 롤백
@@ -247,7 +249,6 @@ int keyevent() {
             prev_playerx = playerx;
             prev_playery = playery;
             prev_step = step;
-            prev_push = push;
             if (moveobject(playery, playerx, key, 1)) {
                 playery += getdiry(key);
                 playerx += getdirx(key);

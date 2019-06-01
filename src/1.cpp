@@ -23,28 +23,28 @@ enum BLOCK { FLOOR = '0',
              PLAYER,
              NONE };
 
-int level;                      // 현재 스테이지 레벨
-int step;                       // 캐릭터가 움직인 횟수
-int prev_step;                  // Undo
-int push;                       // 상자가 움직인 횟수
-int prev_push;                  // Undo
-int playery;                    // 플레이어의 y 좌표
-int prev_playery;               // Undo
-int playerx;                    // 플레이어의 x 좌표
-int prev_playerx;               // Undo
-int diry[4] = {1, -1, 0, 0};    // 방향에 따른 y 좌표 변환 배열
-int dirx[4] = {0, 0, -1, 1};    // 뱡향에 따른 x 좌표 변환 배열
-vector<vector<char>> gamemap;   // 맵 데이터(벽, 목표지점, 바닥, 맵밖)
-vector<vector<char>> prev_gamemap;  // Undo
-vector<vector<char>> objectmap; // 오브젝트 데이터(상자, 플레이어)
-vector<vector<char>> prev_objectmap;    // Undo
+int level;                           // 현재 스테이지 레벨
+int step;                            // 캐릭터가 움직인 횟수
+int prev_step;                       // Undo
+int push;                            // 상자가 움직인 횟수
+int prev_push;                       // Undo
+int playery;                         // 플레이어의 y 좌표
+int prev_playery;                    // Undo
+int playerx;                         // 플레이어의 x 좌표
+int prev_playerx;                    // Undo
+int diry[4] = {1, -1, 0, 0};         // 방향에 따른 y 좌표 변환 배열
+int dirx[4] = {0, 0, -1, 1};         // 뱡향에 따른 x 좌표 변환 배열
+vector<vector<char>> gamemap;        // 맵 데이터(벽, 목표지점, 바닥, 맵밖)
+vector<vector<char>> prev_gamemap;   // Undo
+vector<vector<char>> objectmap;      // 오브젝트 데이터(상자, 플레이어)
+vector<vector<char>> prev_objectmap; // Undo
 
 string res[] = {"  ", "██", "⍈⍇", "◂▸", "  ", "홋", ""}; // 블럭 리소스
 
 WINDOW *right_top;    // 오른쪽 점수판
 WINDOW *right_bottom; // 오른쪽 플레이 안내
-WINDOW *title;       // 상단 타이틀
-WINDOW *game;        // 게임 화면
+WINDOW *title;        // 상단 타이틀
+WINDOW *game;         // 게임 화면
 
 // 블럭 타입을 리소스로 변환
 string getresource(int type) {
@@ -58,8 +58,8 @@ int getdiry(int dir) { return diry[dir - KEY_DOWN]; }
 // nCurses의 키를 입력받으면 변환해야할 x 좌표 값을 반환
 int getdirx(int dir) { return dirx[dir - KEY_DOWN]; }
 
-// 게임(ncurses) 초기설정
-void gameinit() {
+// ncurses 초기화
+void ncursesinit() {
     // 한글 출력을 위한 locale설정
     setlocale(LC_ALL, "");
 
@@ -71,8 +71,10 @@ void gameinit() {
     initscr();
     start_color();
 
-    // 맵 크기에 맞게 터미널 크기 변경
+    // 색상 추가
+    init_pair(1, COLOR_BLACK, COLOR_WHITE);
 
+    // 맵 크기에 맞게 터미널 크기 변경
     resize_term(GAMEY, 2 * GAMEX);
     // 키보드 입력
     keypad(stdscr, TRUE);
@@ -84,12 +86,42 @@ void gameinit() {
     // 터미널 전체 보더
     border(ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
     refresh();
+}
+
+// 게임 첫 실행 화면
+void welcome() {
+    char logo[] = "███████╗ ██████╗ ██╗  ██╗ ██████╗ ██████╗  █████╗ ███╗   ██╗\n██╔════╝██╔═══██╗██║ ██╔╝██╔═══██╗██╔══██╗██╔══██╗████╗  ██║\n███████╗██║   ██║█████╔╝ ██║   ██║██████╔╝███████║██╔██╗ ██║\n╚════██║██║   ██║██╔═██╗ ██║   ██║██╔══██╗██╔══██║██║╚██╗██║\n███████║╚██████╔╝██║  ██╗╚██████╔╝██████╔╝██║  ██║██║ ╚████║\n╚══════╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝";
+    char text[] = "Press any key to start";
+
+    // 게임 첫 화면 레이아웃 윈도우
+    WINDOW *welcome_logo = newwin(5, 69, 7, 10);
+    WINDOW *desc = newwin(1, 22, 18, 29);
+    // 로고 및 설명 출력
+    wprintw(welcome_logo, logo);
+    wattron(desc, COLOR_PAIR(1));
+    wprintw(desc, text);
+    wattroff(desc, COLOR_PAIR(1));
+    // 화면 갱신
+    wrefresh(welcome_logo);
+    wrefresh(desc);
+    // 아무키나 눌러 시작
+    getch();
+    // 새 레이아웃 제거
+    delwin(welcome_logo);
+    delwin(desc);
+}
+
+// 게임 초기설정
+void gameinit() {
+    // 터미널 전체 보더
+    border(ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_ULCORNER, ACS_URCORNER, ACS_LLCORNER, ACS_LRCORNER);
+    refresh();
 
     // 윈도우 선언
     right_top = newwin(13, 30, 2, 50);
     right_bottom = newwin(11, 30, 14, 50);
     title = newwin(3, 0, 0, 0);
-    game = newwin(21, 47, 3, 2);
+    game = newwin(21, 49, 3, 1);
 
     // 윈도우 내부 보더 표시
     wborder(right_top, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_TTEE, ACS_RTEE, ACS_LTEE, ACS_RTEE);
@@ -134,12 +166,14 @@ void loadstage(int stage_num) {
         f >> r >> c;
         gamemap.resize(r, vector<char>(c, FLOOR));
         objectmap.resize(r, vector<char>(c, NONE));
-        for(int i = 0; i < r; i++){
-            for(int j = 0; j < c; j++){
+        for (int i = 0; i < r; i++) {
+            for (int j = 0; j < c; j++) {
                 char ch;
                 f >> ch;
-                if(ch == BOX) objectmap[i][j] = ch;
-                else gamemap[i][j] = ch;
+                if (ch == BOX)
+                    objectmap[i][j] = ch;
+                else
+                    gamemap[i][j] = ch;
             }
         }
         f >> playery >> playerx;
@@ -152,6 +186,35 @@ void loadstage(int stage_num) {
     } else {
         printw("파일 없음");
     }
+}
+
+// 스테이지 클리어 화면
+void completestage(int level) {
+    // 스테이지 클리어 윈도우
+    WINDOW *complete = newwin(22, 0, 2, 0);
+    wborder(complete, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_LTEE, ACS_RTEE, ACS_LLCORNER, ACS_LRCORNER);
+    // 스테이지 번호 아스키 아트
+    char number[][500] = {"",
+                          "    ▄▄▄▄     \n  ▄█░░░░▌    \n ▐░░▌▐░░▌    \n  ▀▀ ▐░░▌    \n     ▐░░▌    \n     ▐░░▌    \n     ▐░░▌    \n     ▐░░▌    \n ▄▄▄▄█░░█▄▄▄ \n▐░░░░░░░░░░░▌\n ▀▀▀▀▀▀▀▀▀▀▀ ",
+                          " ▄▄▄▄▄▄▄▄▄▄▄ \n▐░░░░░░░░░░░▌\n ▀▀▀▀▀▀▀▀▀█░▌\n          ▐░▌\n          ▐░▌\n ▄▄▄▄▄▄▄▄▄█░▌\n▐░░░░░░░░░░░▌\n▐░█▀▀▀▀▀▀▀▀▀ \n▐░█▄▄▄▄▄▄▄▄▄ \n▐░░░░░░░░░░░▌\n ▀▀▀▀▀▀▀▀▀▀▀ ",
+                          " ▄▄▄▄▄▄▄▄▄▄▄ \n▐░░░░░░░░░░░▌\n ▀▀▀▀▀▀▀▀▀█░▌\n          ▐░▌\n ▄▄▄▄▄▄▄▄▄█░▌\n▐░░░░░░░░░░░▌\n ▀▀▀▀▀▀▀▀▀█░▌\n          ▐░▌\n ▄▄▄▄▄▄▄▄▄█░▌\n▐░░░░░░░░░░░▌\n ▀▀▀▀▀▀▀▀▀▀▀ ",
+                          " ▄         ▄ \n▐░▌       ▐░▌\n▐░▌       ▐░▌\n▐░▌       ▐░▌\n▐░█▄▄▄▄▄▄▄█░▌\n▐░░░░░░░░░░░▌\n ▀▀▀▀▀▀▀▀▀█░▌\n          ▐░▌\n          ▐░▌\n          ▐░▌\n           ▀ ",
+                          " ▄▄▄▄▄▄▄▄▄▄▄ \n▐░░░░░░░░░░░▌\n▐░█▀▀▀▀▀▀▀▀▀ \n▐░█▄▄▄▄▄▄▄▄▄ \n▐░░░░░░░░░░░▌\n ▀▀▀▀▀▀▀▀▀█░▌\n          ▐░▌\n          ▐░▌\n ▄▄▄▄▄▄▄▄▄█░▌\n▐░░░░░░░░░░░▌\n ▀▀▀▀▀▀▀▀▀▀▀ "};
+    WINDOW *stage_num = newwin(11, 14, 7, 33);
+    // 스테이지 클리어 문구 출력
+    wattron(complete, COLOR_PAIR(1));
+    mvwprintw(complete, 2, 33, "Stage Complete", level);
+    mvwprintw(complete, 18, 26, "Press any key to continue...");
+    wattroff(complete, COLOR_PAIR(1));
+    // 스테이지 번호 출력
+    wprintw(stage_num, number[level]);
+    // 화면 출력    
+    wrefresh(complete);
+    wrefresh(stage_num);
+    getch();
+    // 윈도우 제거
+    delwin(stage_num);
+    delwin(complete);
 }
 
 // 화면 업데이트
@@ -181,7 +244,7 @@ void refreshstatus() {
     mvwprintw(right_top, 3, 8, "Level :  %d", level);
     mvwprintw(right_top, 5, 8, "Step  :  %d", step);
     mvwprintw(right_top, 7, 8, "Push  :  %d", push);
-    mvwprintw(right_top, 9, 8, "Undo  :  %s", (prev_push != -1) ? "Able" : "Disabled");
+    mvwprintw(right_top, 9, 8, "Undo  :  %s", (prev_push != -1) ? "Enabled " : "Disabled");
     wrefresh(right_top);
 }
 
@@ -223,9 +286,11 @@ bool clearcheck() {
 // 실행취소
 void undo() {
     // 움직인 적이 있을때만 사용이 가능
-    if(!step) return;
+    if (!step)
+        return;
     // 이전에 실행취소했다면 return
-    if(prev_push == -1) return;
+    if (prev_push == -1)
+        return;
     // 이전 데이터로 롤백
     step = prev_step;
     push = prev_push;
@@ -285,13 +350,18 @@ int keyevent() {
 
 // 메인함수
 int main() {
-    // 게임 초기설정
-    gameinit();
-    // 스테이지 로드
+    // ncourses 초기화
+    ncursesinit();
+    // welcome 화면
+    welcome();
     for (level = 1; level <= 5; level++) {
+        // 게임 초기설정
+        gameinit();
+        // 스테이지 로드
         loadstage(level); // 1 ~ 5
         if (keyevent())
-            break;
+            break;            // q키를 입력하면 게임 종료
+        completestage(level); // 스테이지 클리어 화면
     }
     endwin();
     return 0;

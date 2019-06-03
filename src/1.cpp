@@ -201,7 +201,7 @@ void loadstage(int stage_num) {
 // 스테이지 클리어 화면
 void completestage(int level) {
     // 스테이지 클리어 윈도우
-    WINDOW *complete = newwin(22, 0, 2, 0);
+    WINDOW *complete = newwin(23, 0, 2, 0);
     wborder(complete, ACS_VLINE, ACS_VLINE, ACS_HLINE, ACS_HLINE, ACS_LTEE,
             ACS_RTEE, ACS_LLCORNER, ACS_LRCORNER);
     // 스테이지 번호 아스키 아트
